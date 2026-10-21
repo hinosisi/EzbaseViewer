@@ -87,3 +87,13 @@ public sealed record SessionDecisionRequest(bool Approved, string Reason);
 public sealed record SessionDecisionResponse(string SessionId, SessionState State, DateTimeOffset ChangedAt);
 
 public sealed record ApiError(string Code, string Message, string CorrelationId);
+
+public sealed record RemoteEngineProfileResponse(
+    string EngineName,
+    string ClientVersion,
+    string ClientCommit,
+    string ServerName,
+    string ServerVersion,
+    string ServerCommit,
+    string License,
+    string DecisionStatus);

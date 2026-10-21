@@ -54,6 +54,18 @@ try {
     }
 
     $internalHeaders = @{ 'X-Ezbase-Internal-Key' = $testKey }
+    $engine = Invoke-RestMethod `
+        -Method Get `
+        -Uri "$BaseUrl/v1/system/engine" `
+        -Headers $internalHeaders
+
+    if ($engine.engineName -ne 'RustDesk' -or
+        $engine.clientVersion -ne '1.4.9' -or
+        $engine.serverVersion -ne '1.1.16' -or
+        $engine.decisionStatus -ne 'Confirmed') {
+        throw '확정된 RustDesk 엔진 프로필이 API 응답과 일치하지 않습니다.'
+    }
+
     $company = @{
         companyId = 'smoke-company-a'
         displayName = 'Smoke Test Company'
@@ -166,6 +178,7 @@ try {
     }
 
     Write-Output 'PASS health'
+    Write-Output 'PASS RustDesk engine profile'
     Write-Output 'PASS company creation'
     Write-Output 'PASS HostOnly client enrollment and company list'
     Write-Output 'PASS one-time launch code exchange'

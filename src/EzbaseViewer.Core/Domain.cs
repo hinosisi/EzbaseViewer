@@ -48,6 +48,19 @@ public sealed class DomainException(string code, string message) : Exception(mes
     public string Code { get; } = code;
 }
 
+public static class RemoteEngineSelection
+{
+    public static RemoteEngineProfileResponse Current { get; } = new(
+        "RustDesk",
+        "1.4.9",
+        "6c57829",
+        "RustDesk Server OSS",
+        "1.1.16",
+        "73523b3",
+        "AGPL-3.0",
+        "Confirmed");
+}
+
 public sealed class LaunchCodeService(TimeProvider timeProvider)
 {
     private static readonly TimeSpan MaximumLifetime = TimeSpan.FromMinutes(5);

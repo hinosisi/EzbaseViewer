@@ -41,6 +41,12 @@ app.Use(async (context, next) =>
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", utc = DateTimeOffset.UtcNow }));
 
+app.MapGet("/v1/system/engine", (HttpContext http) =>
+{
+    RequireInternalKey(http, app.Configuration);
+    return Results.Ok(RemoteEngineSelection.Current);
+});
+
 app.MapPost("/v1/launch-codes", (
     HttpContext http,
     LaunchCodeIssueRequest request,

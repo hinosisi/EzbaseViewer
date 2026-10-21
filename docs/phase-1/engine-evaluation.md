@@ -1,44 +1,52 @@
-# 원격제어 엔진 평가 작업표
+# RustDesk 엔진 선정 및 검증 작업표
 
-## 필수 게이트
+> 결정 상태: RustDesk 확정
+> 결정일: 2026-10-21
+> PoC 기준선: RustDesk Client `1.4.9` (`6c57829`), RustDesk Server OSS `1.1.16` (`73523b3`)
 
-| 게이트 | RustDesk | RealVNC SDK/OEM | TightVNC | UltraVNC | 근거/담당 |
-|---|---|---|---|---|---|
-| 공개 제품 라이선스 호환 | AGPL-3.0 적용 범위 확인 필요 | 공개 저장소와 SDK 분리·재배포 조건 확인 | 상용 소스 공개 가능 범위 확인 | GPL 결합·배포 의무 확인 | 법무·구매 |
-| UAC 보안 데스크톱 | 시험 전 | 시험 전 | 시험 전 | 시험 전 | Windows A |
-| 로그온 화면 | 시험 전 | 시험 전 | 시험 전 | 시험 전 | Windows A |
-| 재부팅 후 재접속 | 시험 전 | 시험 전 | 시험 전 | 시험 전 | Windows B |
-| 직접→중계 전환 | 공식 구조 확인, 실제 시험 전 | 연결 서비스 조건 확인 필요 | 별도 구성 검토 | Repeater 시험 전 | 서버 개발 |
-| Ezbase 인증·권한 결합 | API/수정 범위 확인 필요 | SDK API 검토 필요 | 통합 범위 확인 필요 | 수정·라이선스 검토 필요 | 서버 개발·보안 |
-| 파일·무인 기능 정책 차단 | 시험 전 | 시험 전 | 시험 전 | 시험 전 | Windows B |
-| 유지보수·보안 지원 | 최신 릴리스·SLA 확인 | SLA 확인 | 최신 지원 범위 확인 | 최신 지원 범위 확인 | 기술 책임자 |
+## 선정 결과
 
-`시험 전`은 미충족이 아니라 아직 증거가 없다는 뜻이다. 한 후보도 필수 게이트를 모두 통과하지 못하면 자체 엔진 개발로 전환하지 않고 범위·기간·예산을 다시 승인받는다.
+EzbaseViewer의 원격 화면·입력·파일 전송 엔진과 직접/중계 연결 기반으로 RustDesk를 사용한다. 자체 인프라에는 RustDesk Server OSS의 `hbbs`와 `hbbr`를 배치한다. RealVNC, TightVNC, UltraVNC와 VncSharp는 구현 후보에서 제외하고 장애 시 재검토 자료로만 남긴다.
 
-## 점수표
+버전 기준선은 2026-10-21 확인 시점의 최신 안정 클라이언트 `1.4.9`와 최신 Server OSS `1.1.16`이다. nightly 및 pre-release는 보안 수정 검토용으로만 사용하며 시범 배포 기준선으로 삼지 않는다.
 
-| 후보 | Windows 25 | 연결 15 | 보안 15 | 임베딩 10 | 라이선스·배포 15 | 유지보수 10 | 성능 10 | 총점 | 결론 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| RustDesk | - | - | - | - | - | - | - | - | 평가 중 |
-| RealVNC SDK/OEM | - | - | - | - | - | - | - | - | 평가 중 |
-| TightVNC | - | - | - | - | - | - | - | - | 자료 확인 |
-| UltraVNC | - | - | - | - | - | - | - | - | 참고 후보 |
+## 구성 경계
 
-각 영역은 0~5점을 준 뒤 `가중치 × 점수/5`로 환산한다. 필수 게이트를 통과하고 총점 75점 이상인 후보만 선정 회의에 올린다.
+| 구성 | 기준 | 라이선스·저장소 원칙 |
+|---|---|---|
+| EzbaseViewer 제어 서버·공용 계약 | 현재 .NET 저장소 | Apache-2.0 유지 |
+| EzbaseViewer 관리자 앱의 RustDesk 데이터 경로 | RustDesk 클라이언트 포크 또는 명확한 프로세스 어댑터 | RustDesk 코드를 포함·수정하는 저장소와 산출물은 AGPL-3.0 의무를 적용 |
+| EzbaseViewer Host | RustDesk Windows 설치형 클라이언트 포크, HostOnly 프로필 | 포크 원본·변경 소스·빌드 스크립트를 AGPL-3.0으로 공개 |
+| 접속 조정·중계 | RustDesk Server OSS `hbbs`·`hbbr` | 서버 원본·변경 소스와 대응 소스 제공 의무 이행 |
+| Ezbase 인증·업체 관리 | EzbaseViewer 제어 서버 | RustDesk 장치 ID와 EzbaseViewer 장치 ID 매핑, 세션 허가 전 정책 검사 |
 
-## 공급사/법무 확인 요청 목록
+AGPL 코드를 Apache-2.0 파일로 복사하거나 라이선스 고지를 제거하지 않는다. 링크·IPC·배포 묶음의 법적 효과는 구현 방식이 정해진 뒤 법무 검토 기록으로 확정한다.
 
-1. 회사 제품명으로 재브랜딩한 Viewer와 Host 재배포 권리
-2. SDK·바이너리 수정 및 정적/동적 링크 조건
-3. 제품의 Apache-2.0 우선안과 호환되는지, 소스·저작권 고지·네트워크 제공 의무의 범위
-4. 자체 인증·장치 서버 및 자체 중계 서버 사용 가능 여부
-5. 장치 수, 관리자 수, 동시 접속 수, 중계량 기준 가격
-6. 오프라인/폐쇄망이 아닌 일반 인터넷 업체 배포 조건
-7. Windows 10/11 지원 종료 정책과 보안 패치 SLA
-8. UAC·로그온·Windows 서비스용 구성요소의 지원 범위
-9. 코드 서명·자동 업데이트·무인 설치 권한
-10. 기술 지원 응답시간과 장애 에스컬레이션 경로
+## 필수 PoC 게이트
+
+| 게이트 | 현재 상태 | 완료 증거 | 담당 |
+|---|---|---|---|
+| UAC 보안 데스크톱 | 검증대기 | 설치형 Host에서 보기·입력 녹화 | Windows A |
+| 로그온·잠금 화면 | 검증대기 | 로그오프·잠금 상태 접속 기록 | Windows A |
+| 재부팅 후 재접속 | 검증대기 | 서비스 자동 시작과 재접속 로그 | Windows B |
+| 직접→중계 전환 | 공식 구조 확인, 실측대기 | 직접 경로 차단 후 `hbbr` 연결 로그 | 서버 개발 |
+| HostOnly 빌드 | 검증대기 | 대상 검색·접속 시작 UI/CLI 부재 확인 | Windows B |
+| Ezbase 세션 허가 결합 | 설계완료, 구현대기 | 만료·철회·업체 경계 통합시험 | 서버 개발·보안 |
+| 파일·무인 정책 차단 | 검증대기 | 서버 정책에 따른 기능 거부 시험 | Windows B |
+| AGPL 대응 소스 제공 | 절차정의 | 포크 저장소·빌드 재현·고지 검토 | 기술 책임자·법무 |
+| 유지보수·보안 추적 | 기준선 확정 | upstream 릴리스·보안 변경 검토 기록 | 기술 책임자 |
+
+기술 엔진 선정은 완료됐지만 위 게이트를 통과하기 전에는 시범 업체에 배포하지 않는다. 필수 게이트 실패 시 RustDesk를 즉시 교체하지 않고 포크 수정 가능성, 일정과 보안 영향을 먼저 재평가한다.
+
+## 공식 근거
+
+- RustDesk Client 저장소와 라이선스: <https://github.com/rustdesk/rustdesk>
+- RustDesk Client 릴리스: <https://github.com/rustdesk/rustdesk/releases>
+- RustDesk Server OSS 저장소: <https://github.com/rustdesk/rustdesk-server>
+- RustDesk Server OSS 릴리스: <https://github.com/rustdesk/rustdesk-server/releases>
+- `hbbs`·`hbbr` 구성 문서: <https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/>
+- 자체 서버 클라이언트 설정: <https://rustdesk.com/docs/en/self-host/client-configuration/>
 
 ## VncSharp 처리
 
-VncSharp는 Viewer 구현과 RFB 프로토콜 이해를 위한 참고 자료로만 다룬다. Host, 접속 조정, 중계, 장치·권한 관리가 포함된 완성형 후보 점수표에는 넣지 않는다.
+VncSharp는 RFB 프로토콜과 과거 .NET Viewer 구현을 이해하기 위한 참고 자료로만 유지한다. EzbaseViewer 제품 코드나 엔진 어댑터의 기반으로 사용하지 않는다.

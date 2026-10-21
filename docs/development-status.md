@@ -16,7 +16,8 @@
 - `hinosisi/EzbaseViewer` 공개 저장소와 Apache-2.0 초기 커밋
 - 무인 접속 정책과 기능 권한 상승 차단
 - 상관관계 ID와 메모리 기반 감사 이벤트
-- 엔진 후보 평가표, 공급사 확인 목록, PoC 실행서
+- RustDesk 엔진 선정 ADR, 통합 설계와 PoC 실행서
+- RustDesk Client `1.4.9`·Server OSS `1.1.16` 기준선을 고정한 엔진 프로필 API
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
 
 ## 검증 결과
@@ -30,7 +31,9 @@
 | Host 전용 역할 강제 | 통과 |
 | 무인 접속 정책 적용 | 통과 |
 | 기능 권한 상승 거부 | 통과 |
+| RustDesk 엔진 프로필 고정 | 통과 |
 | HTTP health·Host 등록·업체별 조회 | 통과 |
+| HTTP RustDesk 엔진 프로필 조회 | 통과 |
 | 코드 발급·교환·재사용 거부 | 통과 |
 | 승인형 세션 요청 | 통과 |
 | 감사 이벤트 수집 | 통과 |
@@ -38,8 +41,8 @@
 ## 현재 제약
 
 - 저장소는 메모리 기반 PoC다. 운영 데이터베이스와 실제 IdP를 연결하지 않았다.
-- 화면·입력·파일·직접/중계 데이터 경로는 엔진 선정 게이트 전이므로 구현하지 않았다.
-- 후보 평가판/SDK와 라이선스·계약 정보가 없어 UAC·로그온·재부팅 PoC를 수행할 수 없다.
+- 화면·입력·파일·직접/중계 데이터 경로는 RustDesk 통합 PoC 전이므로 구현하지 않았다.
+- RustDesk는 확정했지만 Windows 시험 장치와 자체 `hbbs`·`hbbr` 환경이 없어 UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
 - Apache-2.0 `LICENSE`와 `NOTICE`를 적용했으며 초기 저작권 표시는 `EzbaseViewer contributors`이다.
 - Ezbase 실제 사용자·조직·업체·장치 식별자와 앱 실행 방식이 제공되지 않았다.
 - REA는 Codex MCP에 등록되지 않았고 Ghidra/Hopper/IDA가 없다.
@@ -48,9 +51,9 @@
 
 1. Ezbase 기술 인터페이스 문서와 개발 계정
 2. 시범 업체의 지원 Windows 버전과 설치 권한 정책
-3. RustDesk 공개 라이선스 적용 범위 또는 RealVNC SDK 평가판 등 합법적인 후보 패키지
-4. 후보별 공개 라이선스 호환성, 재배포·브랜딩·중계·동시접속 조건의 서면 근거
+3. RustDesk 포크 저장소와 Windows 빌드 환경
+4. AGPL-3.0 대응 소스 제공과 EzbaseViewer Apache 구성요소 경계의 서면 검토
 5. GitHub 보호 브랜치·자동 검사와 비공개 보안 제보 채널 설정
 6. REA Codex 등록과 네이티브 분석 제공자 설치 승인
 
-입력이 확보되면 `docs/phase-1/poc-runbook.md` 순서로 필수 게이트를 수행하고 엔진 선정 ADR을 작성한다.
+입력이 확보되면 `docs/phase-1/poc-runbook.md` 순서로 RustDesk 필수 게이트를 수행하고 결과를 선정 ADR에 연결한다.

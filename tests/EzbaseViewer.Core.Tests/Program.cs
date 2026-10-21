@@ -8,7 +8,8 @@ var tests = new (string Name, Action Run)[]
     ("다른 업체 클라이언트 접근은 거부된다", CrossCompanyAccessIsRejected),
     ("클라이언트는 Host 전용으로 등록된다", ClientIsEnrolledAsHostOnly),
     ("철회된 무인 접속은 거부된다", UnattendedAccessPolicyIsEnforced),
-    ("허용 기능을 확장한 요청은 거부된다", CapabilityEscalationIsRejected)
+    ("허용 기능을 확장한 요청은 거부된다", CapabilityEscalationIsRejected),
+    ("원격제어 엔진은 RustDesk로 고정된다", RemoteEngineIsRustDesk)
 };
 
 var failures = new List<string>();
@@ -122,6 +123,19 @@ static void CapabilityEscalationIsRejected()
             "device-a",
             false,
             new[] { RemoteCapability.ViewScreen, RemoteCapability.TransferFiles })));
+}
+
+static void RemoteEngineIsRustDesk()
+{
+    var engine = RemoteEngineSelection.Current;
+    if (engine.EngineName != "RustDesk" ||
+        engine.ClientVersion != "1.4.9" ||
+        engine.ServerVersion != "1.1.16" ||
+        engine.License != "AGPL-3.0" ||
+        engine.DecisionStatus != "Confirmed")
+    {
+        throw new InvalidOperationException("확정된 RustDesk 엔진 프로필이 변경되었습니다.");
+    }
 }
 
 static LaunchCodeIssueRequest CreateLaunchRequest(string deviceId) => new(
