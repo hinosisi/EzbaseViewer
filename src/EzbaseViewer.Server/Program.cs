@@ -32,9 +32,13 @@ app.Use(async (context, next) =>
     }
     catch (DomainException exception)
     {
-        context.Response.StatusCode = exception.Code.Contains("not_found", StringComparison.Ordinal)
-            ? StatusCodes.Status404NotFound
-            : StatusCodes.Status400BadRequest;
+        context.Response.StatusCode = exception.Code switch
+        {
+            var code when code.Contains("not_found", StringComparison.Ordinal) => StatusCodes.Status404NotFound,
+            "internal_auth_failed" or "private_network_required" => StatusCodes.Status403Forbidden,
+            var code when code.EndsWith("_denied", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status400BadRequest
+        };
         await context.Response.WriteAsJsonAsync(new ApiError(exception.Code, exception.Message, correlationId));
     }
 });
@@ -43,7 +47,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", utc = DateTimeOffset
 
 app.MapGet("/v1/system/engine", (HttpContext http) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     return Results.Ok(RemoteEngineSelection.Current);
 });
 
@@ -53,7 +57,7 @@ app.MapPost("/v1/launch-codes", (
     LaunchCodeService launchCodes,
     AuditTrail audit) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var response = launchCodes.Issue(request, TimeSpan.FromSeconds(60));
     audit.Add("launch_code_issued", request.UserId, request.CompanyId, request.DeviceId, "success", http.TraceIdentifier);
     return Results.Ok(response);
@@ -90,7 +94,7 @@ app.MapPost("/v1/companies", (
     CompanyDirectory companies,
     AuditTrail audit) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var company = companies.Create(request);
     audit.Add("company_created", "system", company.CompanyId, string.Empty, "success", http.TraceIdentifier);
     return Results.Ok(new CompanyResponse(company.CompanyId, company.DisplayName, company.CreatedAt, 0));
@@ -101,7 +105,7 @@ app.MapGet("/v1/companies", (
     CompanyDirectory companies,
     DeviceDirectory devices) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var response = companies.List()
         .Select(company => new CompanyResponse(
             company.CompanyId,
@@ -116,7 +120,7 @@ app.MapGet("/v1/companies/{companyId}/clients", (
     string companyId,
     DeviceDirectory devices) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var response = devices.ListByCompany(companyId)
         .Select(device => new ManagedClientResponse(
             device.DeviceId,
@@ -134,7 +138,7 @@ app.MapPost("/v1/clients/enrollments", (
     DeviceDirectory devices,
     AuditTrail audit) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var device = devices.Enroll(request);
     audit.Add("client_host_enrolled", "system", device.CompanyId, device.DeviceId, "success", http.TraceIdentifier);
     return Results.Ok(new DeviceEnrollmentResponse(
@@ -169,7 +173,7 @@ app.MapPost("/v1/sessions/{sessionId}/authorize", (
     SessionService sessions,
     AuditTrail audit) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     var session = sessions.Decide(sessionId, request.Approved);
     audit.Add("session_decided", "host", session.CompanyId, session.DeviceId, session.State.ToString(), http.TraceIdentifier);
     return Results.Ok(new SessionDecisionResponse(session.SessionId, session.State, DateTimeOffset.UtcNow));
@@ -177,7 +181,7 @@ app.MapPost("/v1/sessions/{sessionId}/authorize", (
 
 app.MapGet("/v1/audit-events", (HttpContext http, AuditTrail audit) =>
 {
-    RequireInternalKey(http, app.Configuration);
+    RequireEzbasePrivateAccess(http, app.Configuration);
     return Results.Ok(audit.ReadAll());
 });
 
@@ -212,6 +216,18 @@ static void RequireInternalKey(HttpContext http, IConfiguration configuration)
     {
         throw new DomainException("internal_auth_failed", "내부 API 인증에 실패했습니다.");
     }
+}
+
+static void RequireEzbasePrivateAccess(HttpContext http, IConfiguration configuration)
+{
+    if (!PrivateNetworkPolicy.IsAllowed(http.Connection.RemoteIpAddress))
+    {
+        throw new DomainException(
+            "private_network_required",
+            "Ezbase 내부 연동 API는 사설망 또는 루프백 연결에서만 사용할 수 있습니다.");
+    }
+
+    RequireInternalKey(http, configuration);
 }
 
 public sealed record AuditEvent(

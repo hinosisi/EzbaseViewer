@@ -18,6 +18,10 @@
 - 상관관계 ID와 메모리 기반 감사 이벤트
 - RustDesk 엔진 선정 ADR, 통합 설계와 PoC 실행서
 - RustDesk Client `1.4.9`·Server OSS `1.1.16` 기준선을 고정한 엔진 프로필 API
+- 공개 제품·공개 AGPL 포크·비공개 Ezbase 어댑터·비밀관리의 4단계 정보 경계
+- Ezbase 내부 API의 사설망/루프백 제한과 내부 서비스 키 이중 검사
+- 공개 반입 경계 검사 스크립트
+- Pull Request와 `main` 푸시에서 경계·빌드·정책·API 시험을 수행하는 GitHub Actions
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
 
 ## 검증 결과
@@ -32,6 +36,7 @@
 | 무인 접속 정책 적용 | 통과 |
 | 기능 권한 상승 거부 | 통과 |
 | RustDesk 엔진 프로필 고정 | 통과 |
+| 공인 주소의 Ezbase 내부 API 접근 차단 | 통과 |
 | HTTP health·Host 등록·업체별 조회 | 통과 |
 | HTTP RustDesk 엔진 프로필 조회 | 통과 |
 | 코드 발급·교환·재사용 거부 | 통과 |
@@ -45,6 +50,7 @@
 - RustDesk는 확정했지만 Windows 시험 장치와 자체 `hbbs`·`hbbr` 환경이 없어 UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
 - Apache-2.0 `LICENSE`와 `NOTICE`를 적용했으며 초기 저작권 표시는 `EzbaseViewer contributors`이다.
 - Ezbase 실제 사용자·조직·업체·장치 식별자와 앱 실행 방식이 제공되지 않았다.
+- 실제 Ezbase 내부 어댑터는 비공개 저장소가 준비된 뒤 구현한다. 공개 저장소에는 중립 계약만 유지한다.
 - REA는 Codex MCP에 등록되지 않았고 Ghidra/Hopper/IDA가 없다.
 
 ## 다음 게이트 입력

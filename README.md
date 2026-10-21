@@ -4,7 +4,7 @@
 
 EzbaseViewer는 Ezbase와 연계하는 Windows 원격제어 제품이다. 관리자 앱은 업체별 클라이언트 호스트를 조회·관리·접속하고, 대상 PC에는 TeamViewer Host와 같은 Host 전용 에이전트만 설치한다. Host 에이전트에는 대상 검색이나 원격 접속 시작 기능을 두지 않는다.
 
-EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 저장소 최상위의 `LICENSE`와 `NOTICE`가 적용되며, 저작권 표시는 `EzbaseViewer contributors`이다. 계약상 비공개 SDK, 업체 정보, 운영 키와 서명 키는 공개 범위에 포함하지 않는다. 세부 기준은 [공개 소스 운영 정책](OPEN_SOURCE.md)을 따른다.
+EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 실제 Ezbase 내부 API·DB·SSO에 접근하는 어댑터와 운영정보는 비공개 저장소로 분리하며 이 저장소에는 중립 계약만 둔다. 저장소 최상위의 `LICENSE`와 `NOTICE`가 적용되며, 세부 기준은 [공개 소스 운영 정책](OPEN_SOURCE.md)과 [공개·비공개 경계](docs/public-private-boundary.md)를 따른다.
 
 원격제어 엔진은 RustDesk로 확정했다. 현재 구현은 RustDesk 통합 PoC를 지원하는 제어 영역(control plane) 골격이며, 화면 캡처·입력 주입·중계 데이터 경로는 RustDesk Client `1.4.9`와 Server OSS `1.1.16` 기준으로 검증·통합한다.
 
@@ -18,7 +18,7 @@ EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 저장소 �
 - 승인형/무인 세션 요청 및 무인 접속 정책
 - 요청 기능 상향 방지
 - 메모리 기반 감사 이벤트와 상관관계 ID
-- 핵심 보안 규칙과 RustDesk 엔진 고정을 확인하는 7개 자동 시험
+- 핵심 보안 규칙, RustDesk 엔진 고정과 Ezbase 내부망 제한을 확인하는 8개 자동 시험
 
 현재 저장소는 탐색용 기반이며 다음 기능은 아직 제품 구현이 아니다.
 
@@ -41,6 +41,7 @@ EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 저장소 �
 dotnet build .\EzbaseViewer.slnx --configuration Release
 dotnet run --project .\tests\EzbaseViewer.Core.Tests\EzbaseViewer.Core.Tests.csproj --configuration Release
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-api.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-public-boundary.ps1
 ```
 
 ## 제어 서버 실행
@@ -52,7 +53,7 @@ $env:EZBASEVIEWER_INTERNAL_KEY = "replace-with-a-development-only-secret"
 dotnet run --project .\src\EzbaseViewer.Server\EzbaseViewer.Server.csproj --urls http://127.0.0.1:5080
 ```
 
-`GET /v1/system/engine`, `POST /v1/companies`, `POST /v1/clients/enrollments`, `POST /v1/launch-codes`에는 `X-Ezbase-Internal-Key` 헤더가 필요하다. 엔진 프로필 API는 확정된 RustDesk Client·Server 기준선을 반환한다. 관리자 앱은 `GET /v1/companies`와 `GET /v1/companies/{companyId}/clients`로 업체별 Host를 관리한다. 실행 코드 교환 후 받은 앱 토큰은 `POST /v1/sessions`의 Bearer 토큰으로 사용한다.
+`GET /v1/system/engine`, `POST /v1/companies`, `POST /v1/clients/enrollments`, `POST /v1/launch-codes` 등 내부 엔드포인트는 사설망/루프백 연결과 `X-Ezbase-Internal-Key`를 모두 요구한다. 인터넷 경로에는 이 엔드포인트를 라우팅하지 않는다. 실제 Ezbase 내부 연동 구현과 설정은 비공개 저장소에서 관리한다. 실행 코드 교환 후 받은 앱 토큰은 `POST /v1/sessions`의 Bearer 토큰으로 사용한다.
 
 ## 작업 순서
 

@@ -1,5 +1,6 @@
 using EzbaseViewer.Contracts;
 using EzbaseViewer.Core;
+using System.Net;
 
 var tests = new (string Name, Action Run)[]
 {
@@ -9,7 +10,8 @@ var tests = new (string Name, Action Run)[]
     ("클라이언트는 Host 전용으로 등록된다", ClientIsEnrolledAsHostOnly),
     ("철회된 무인 접속은 거부된다", UnattendedAccessPolicyIsEnforced),
     ("허용 기능을 확장한 요청은 거부된다", CapabilityEscalationIsRejected),
-    ("원격제어 엔진은 RustDesk로 고정된다", RemoteEngineIsRustDesk)
+    ("원격제어 엔진은 RustDesk로 고정된다", RemoteEngineIsRustDesk),
+    ("Ezbase 내부 API는 공인 주소에서 차단된다", EzbaseInternalApiRejectsPublicAddress)
 };
 
 var failures = new List<string>();
@@ -135,6 +137,21 @@ static void RemoteEngineIsRustDesk()
         engine.DecisionStatus != "Confirmed")
     {
         throw new InvalidOperationException("확정된 RustDesk 엔진 프로필이 변경되었습니다.");
+    }
+}
+
+static void EzbaseInternalApiRejectsPublicAddress()
+{
+    if (PrivateNetworkPolicy.IsAllowed(null) ||
+        PrivateNetworkPolicy.IsAllowed(IPAddress.Parse("203.0.113.10")))
+    {
+        throw new InvalidOperationException("공인 주소가 Ezbase 내부 API 접근 대상으로 허용되었습니다.");
+    }
+
+    var allowed = new[] { "127.0.0.1", "10.0.0.10", "172.16.0.10", "192.168.0.10", "fd00::10" };
+    if (allowed.Any(value => !PrivateNetworkPolicy.IsAllowed(IPAddress.Parse(value))))
+    {
+        throw new InvalidOperationException("사설망 또는 루프백 주소가 잘못 차단되었습니다.");
     }
 }
 

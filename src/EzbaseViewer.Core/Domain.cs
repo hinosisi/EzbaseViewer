@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using EzbaseViewer.Contracts;
@@ -59,6 +60,40 @@ public static class RemoteEngineSelection
         "73523b3",
         "AGPL-3.0",
         "Confirmed");
+}
+
+public static class PrivateNetworkPolicy
+{
+    public static bool IsAllowed(IPAddress? address)
+    {
+        if (address is null)
+        {
+            return false;
+        }
+
+        if (IPAddress.IsLoopback(address))
+        {
+            return true;
+        }
+
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
+        var bytes = address.GetAddressBytes();
+        if (bytes.Length == 4)
+        {
+            return bytes[0] == 10 ||
+                   bytes[0] == 127 ||
+                   bytes[0] == 192 && bytes[1] == 168 ||
+                   bytes[0] == 172 && bytes[1] is >= 16 and <= 31 ||
+                   bytes[0] == 169 && bytes[1] == 254;
+        }
+
+        return bytes.Length == 16 &&
+               ((bytes[0] & 0xFE) == 0xFC || bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0x80);
+    }
 }
 
 public sealed class LaunchCodeService(TimeProvider timeProvider)

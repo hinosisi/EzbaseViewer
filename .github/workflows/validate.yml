@@ -1,0 +1,38 @@
+name: validate-public-boundary
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Check public boundary
+        shell: powershell
+        run: .\scripts\check-public-boundary.ps1
+
+      - name: Restore
+        run: dotnet restore .\EzbaseViewer.slnx
+
+      - name: Build
+        run: dotnet build .\EzbaseViewer.slnx --configuration Release --no-restore
+
+      - name: Run policy tests
+        run: dotnet run --project .\tests\EzbaseViewer.Core.Tests\EzbaseViewer.Core.Tests.csproj --configuration Release --no-build --no-restore
+
+      - name: Run API smoke test
+        shell: powershell
+        run: .\scripts\smoke-api.ps1

@@ -6,3 +6,14 @@ TestResults/
 *.suo
 artifacts/
 work/
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.kdbx
+private/
+secrets/
+customer-data/
+deploy/production/
