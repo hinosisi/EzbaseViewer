@@ -13,15 +13,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
       - name: Check public boundary
-        shell: powershell
+        shell: pwsh
         run: .\scripts\check-public-boundary.ps1
 
       - name: Restore
@@ -34,5 +34,5 @@ jobs:
         run: dotnet run --project .\tests\EzbaseViewer.Core.Tests\EzbaseViewer.Core.Tests.csproj --configuration Release --no-build --no-restore
 
       - name: Run API smoke test
-        shell: powershell
+        shell: pwsh
         run: .\scripts\smoke-api.ps1
