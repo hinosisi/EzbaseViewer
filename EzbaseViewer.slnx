@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/EzbaseViewer.Contracts/EzbaseViewer.Contracts.csproj" />
+  <Project Path="src/EzbaseViewer.Core/EzbaseViewer.Core.csproj" />
+  <Project Path="src/EzbaseViewer.Server/EzbaseViewer.Server.csproj" />
+  <Project Path="tests/EzbaseViewer.Core.Tests/EzbaseViewer.Core.Tests.csproj" />
+</Solution>

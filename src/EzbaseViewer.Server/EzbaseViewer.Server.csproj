@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../EzbaseViewer.Contracts/EzbaseViewer.Contracts.csproj" />
+    <ProjectReference Include="../EzbaseViewer.Core/EzbaseViewer.Core.csproj" />
+  </ItemGroup>
+</Project>
