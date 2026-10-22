@@ -13,7 +13,7 @@
 | Server `hbb_common` submodule | `83419b6549636ee39dacef7776c473f5802e08d6` | 해당 없음 | Server가 지정한 커밋 복제 완료 |
 | Client·Server 라이선스 본문 | AGPL-3.0 | `6F1E622C82A380075843BB084A7EC3B1F1D12A4A02526D75E78B0924A860AA75` | 동일 본문 해시 확인 |
 
-복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 분석 기록과 패치만 검토 후 공개 저장소 또는 향후 공개 AGPL 포크에 반영한다.
+원본 복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 제품 변경은 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에 반영한다. 최초 변경 커밋은 `b7c2bad`다.
 
 ## Windows 빌드 기준
 
@@ -77,12 +77,24 @@ pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
 
 이 검증은 로컬 프로세스 기동 게이트다. 서로 다른 인터넷 회선의 직접 연결, 강제 중계와 실제 Client 연결 성공을 증명하지 않는다.
 
+## HostOnly 포크 검증
+
+공개 포크의 `ezbaseviewer-hostonly` 브랜치에 Cargo 기능 `ezbaseviewer-host`를 추가했다. 이 기능은 기존 incoming-only UI를 활성화하고 Rust 연결 코어가 외부 대상 연결을 시작하지 못하게 한다. Windows 제품 메타데이터와 런타임 앱 이름은 `EzbaseViewer Host`로 구분한다.
+
+| 검증 | 결과 |
+|---|---|
+| `cargo +1.75.0 check --locked --features flutter,hwcodec,ezbaseviewer-host --lib` | 통과 |
+| `common::tests::ezbaseviewer_host_profile_is_incoming_only_and_branded` | 통과, 1개 실행 |
+| 공개 브랜치 | `hinosisi/EzbaseViewer-rustdesk:ezbaseviewer-hostonly` |
+
+전체 Windows Flutter Release 산출물 생성과 실제 설치형 Host 동작은 다음 시험 게이트에서 수행한다.
+
 ## 다음 실행
 
 1. `scripts/check-rustdesk-poc-prerequisites.ps1`로 준비 상태를 재현한다.
 2. 생성된 `hbbs`·`hbbr`의 로컬 기동 스모크 결과를 기준으로 격리 시험망의 서버 주소·방화벽·로그 보존 위치를 확정한다.
 3. 원본 Client 두 대를 격리 시험망 서버에 연결해 직접 연결과 강제 중계 연결을 구분해 확인한다.
-4. 공개 AGPL 포크를 만들고 `ezbaseviewer-hostonly` 브랜치에서 HostOnly 변경을 시작한다.
+4. 공개 포크의 `ezbaseviewer-hostonly` 브랜치로 Windows Flutter Release Host를 빌드하고 접속 시작 UI가 없는지 확인한다.
 5. `poc-runbook.md`의 다중 모니터, 파일 무결성, 단절·재접속, UAC·로그온, 재부팅 게이트를 순서대로 수행한다.
 6. 통과 증거와 미통과 항목을 ADR에 연결해 핵심 개발 착수 여부를 결정한다.
 

@@ -9,7 +9,7 @@ EzbaseViewer의 제품 소스는 공개하되, Ezbase 내부 시스템에 직접
 | 등급 | 저장 위치 | 포함 항목 | 배포·접근 원칙 |
 |---|---|---|---|
 | `PUBLIC-APACHE` | `hinosisi/EzbaseViewer` | 중립 API 계약, 제어 서버, 시험 코드, 빌드 스크립트, 공개 설계 문서 | Apache-2.0으로 공개 |
-| `PUBLIC-AGPL` | 별도 RustDesk 포크 저장소 | RustDesk Client·Server 원본, HostOnly·Viewer 변경, 대응 소스와 빌드 방법 | AGPL-3.0과 원 저작권 고지를 유지해 공개 |
+| `PUBLIC-AGPL` | [`hinosisi/EzbaseViewer-rustdesk`](https://github.com/hinosisi/EzbaseViewer-rustdesk) | RustDesk Client·Server 원본, HostOnly·Viewer 변경, 대응 소스와 빌드 방법 | AGPL-3.0과 원 저작권 고지를 유지해 공개 |
 | `INTERNAL` | 비공개 Ezbase 연동 저장소 | Ezbase 내부 API·DB·SSO 어댑터, 실제 필드 매핑, 내부 주소, 배포 토폴로지 | 승인된 개발·운영자만 접근 |
 | `RESTRICTED` | 비밀관리·감사 시스템 | 운영 비밀번호·토큰·개인키·서명키, 인증서, 고객/장치/사용자 데이터, 실제 감사·장애 기록 | Git 저장 금지, 최소권한과 접근 감사 적용 |
 
@@ -37,7 +37,7 @@ PUBLIC  hinosisi/EzbaseViewer
         ├─ 공개 시험·문서·설정 예시
         └─ 실제 Ezbase 어댑터와 운영값 없음
 
-PUBLIC  hinosisi/EzbaseViewer-rustdesk (생성 예정)
+PUBLIC  hinosisi/EzbaseViewer-rustdesk
         ├─ RustDesk 기반 Viewer/HostOnly 변경
         ├─ RustDesk Server 변경
         └─ AGPL 대응 소스·빌드 절차

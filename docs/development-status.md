@@ -31,6 +31,8 @@
 - 임시 드라이브 변경 시 남는 Flutter CMake 절대 경로 캐시의 자동 정리와 경로 안전 검사
 - `hbbs`·`hbbr` 로컬 기동, 기본 파생 포트, UDP rendezvous와 Ed25519 키 생성 스모크 검사
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
+- `hinosisi/EzbaseViewer-rustdesk` 공개 AGPL 포크와 `ezbaseviewer-hostonly` 브랜치 생성
+- Host 프로필의 incoming-only 강제, EzbaseViewer Host 브랜딩과 원격 접속 시작 코어 차단
 
 ## 검증 결과
 
@@ -55,6 +57,8 @@
 | RustDesk 고정 도구 체인·서브모듈 검사 | 통과 |
 | RustDesk 전체 재현 빌드 스크립트 | 통과 (`-ShortDrive S`, 종료 후 드라이브 해제·원본 `pubspec.yaml` 복원) |
 | RustDesk Server 로컬 기동 스모크 | 통과 (`hbbs` TCP 22115·22116·22118/UDP 22116, `hbbr` TCP 22117·22119, 키 생성·종료) |
+| RustDesk HostOnly 기능 컴파일 | 통과 (`flutter,hwcodec,ezbaseviewer-host`) |
+| HostOnly 정책·브랜딩 단위시험 | 통과 (`1 passed`) |
 
 ## 현재 제약
 
@@ -70,7 +74,7 @@
 
 1. Ezbase 기술 인터페이스 문서와 개발 계정
 2. 시범 업체의 지원 Windows 버전과 설치 권한 정책
-3. RustDesk 공개 AGPL 포크 저장소와 격리 시험망의 자체 `hbbs`·`hbbr` 주소
+3. 격리 시험망의 자체 `hbbs`·`hbbr` 주소
 4. AGPL-3.0 대응 소스 제공과 EzbaseViewer Apache 구성요소 경계의 서면 검토
 5. GitHub 보호 브랜치·자동 검사와 비공개 보안 제보 채널 설정
 6. UAC·로그온·재부팅 시험용 관리자 권한 Windows 장치 2대 이상

@@ -8,6 +8,8 @@ EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 실제 Ezbas
 
 원격제어 엔진은 RustDesk로 확정했다. 현재 구현은 RustDesk 통합 PoC를 지원하는 제어 영역(control plane) 골격이며, 화면 캡처·입력 주입·중계 데이터 경로는 RustDesk Client `1.4.9`와 Server OSS `1.1.16` 기준으로 검증·통합한다.
 
+RustDesk 변경 소스는 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에서 관리한다. 최초 Host 프로필은 RustDesk의 incoming-only 정책을 컴파일 시 강제하고 원격 접속 시작 UI와 코어 연결 경로를 차단한다.
+
 ## 현재 구현
 
 - 60초 일회용 실행 코드 발급과 원자적 1회 소비
@@ -73,7 +75,7 @@ dotnet run --project .\src\EzbaseViewer.Server\EzbaseViewer.Server.csproj --urls
 2. `docs/phase-1/poc-runbook.md`로 RustDesk Windows·직접/중계 PoC를 수행한다.
 3. [PoC 준비 현황](docs/phase-1/rustdesk-poc-readiness.md)과 `scripts/check-rustdesk-poc-prerequisites.ps1`로 고정 도구 체인을 준비한다.
 4. `docs/phase-1/rea-readiness.md`에 따라 설명이 부족한 바이너리 동작만 REA로 보완 분석한다.
-5. HostOnly 포크와 관리자 Viewer 어댑터, `hbbs`·`hbbr` 시험 환경을 구성한다.
+5. 공개 포크의 `ezbaseviewer-hostonly` 브랜치를 기준으로 Host 시험 빌드를 만들고 관리자 Viewer 어댑터와 `hbbs`·`hbbr` 시험 환경을 구성한다.
 6. 필수 게이트 증거를 승인한 뒤 핵심 원격제어 개발로 전환한다.
 
 상위 계획은 [EzbaseViewer 개발 계획](docs/EzbaseViewer%20개발%20계획.md)을 따른다.
