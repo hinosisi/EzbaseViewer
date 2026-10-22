@@ -50,9 +50,11 @@ RustDesk 고정 소스와 도구 체인이 `work/`에 준비된 PC에서는 다�
 ```powershell
 pwsh -NoProfile -File .\scripts\check-rustdesk-poc-prerequisites.ps1
 pwsh -NoProfile -File .\scripts\build-rustdesk-poc.ps1
+pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
 ```
 
 긴 작업 경로에서는 빌드 스크립트가 기본적으로 임시 `R:` 드라이브를 사용한다. 이미 사용 중이면 `-ShortDrive S`처럼 다른 문자를 지정한다. 스크립트는 종료 시 임시 드라이브와 Client의 임시 의존성 변경을 복원한다.
+서버 스모크 시험은 로컬 PoC 포트에서 `hbbs`·`hbbr`를 잠시 실행해 수신 포트와 키 생성을 검사한 뒤 항상 종료한다. 생성 키와 로그는 Git에서 제외된 `work/poc-runtime/`에 둔다.
 
 ## 제어 서버 실행
 

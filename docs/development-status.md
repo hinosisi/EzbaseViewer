@@ -29,6 +29,7 @@
 - Client·Server 산출물 크기, SHA-256과 미서명 상태 기록
 - 사전 점검부터 Client bridge·Windows Release·Server Release·산출물 검사까지 단일 재현 스크립트 연속 통과
 - 임시 드라이브 변경 시 남는 Flutter CMake 절대 경로 캐시의 자동 정리와 경로 안전 검사
+- `hbbs`·`hbbr` 로컬 기동, 기본 파생 포트, UDP rendezvous와 Ed25519 키 생성 스모크 검사
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
 
 ## 검증 결과
@@ -53,6 +54,7 @@
 | RustDesk Server OSS 1.1.16 Windows Release 빌드 | 통과 (`hbbs.exe`, `hbbr.exe`) |
 | RustDesk 고정 도구 체인·서브모듈 검사 | 통과 |
 | RustDesk 전체 재현 빌드 스크립트 | 통과 (`-ShortDrive S`, 종료 후 드라이브 해제·원본 `pubspec.yaml` 복원) |
+| RustDesk Server 로컬 기동 스모크 | 통과 (`hbbs` TCP 22115·22116·22118/UDP 22116, `hbbr` TCP 22117·22119, 키 생성·종료) |
 
 ## 현재 제약
 

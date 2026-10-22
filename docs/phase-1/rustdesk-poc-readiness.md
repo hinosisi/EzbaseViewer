@@ -59,15 +59,29 @@ RustDesk 공식 Windows 빌드 문서는 MSVC C++ workload, Rust, vcpkg, LLVM/li
 ```powershell
 pwsh -NoProfile -File .\scripts\check-rustdesk-poc-prerequisites.ps1
 pwsh -NoProfile -File .\scripts\build-rustdesk-poc.ps1
+pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
 ```
 
 2026-10-22 전체 실행에서 사전 점검, Client bridge 생성, Client Windows Release, Server Release, 산출물 검사까지 연속 통과했다. 빌드 스크립트는 Windows 긴 경로를 피하려고 작업 중에만 `R:`을 `work/`에 연결하며 종료 시 해제한다. 다른 드라이브 문자가 필요하면 `-ShortDrive S`처럼 지정한다. Client bridge 생성 시 공식 CI 절차에 맞춰 `extended_text`를 잠시 `13.0.0`으로 내리고 생성 후 원래 `14.0.0`으로 복원한다. Flutter CMake가 절대 드라이브 경로를 캐시하므로, 스크립트는 현재 빌드 전에 생성된 `flutter/build/windows`만 경로 검증 후 정리한다.
 
+## Server 로컬 기동 검증
+
+빌드한 Server를 외부에 노출하지 않는 로컬 PoC 설정으로 5초간 실행하고 프로세스·수신 포트·키 생성을 확인했다. 검사는 `scripts/smoke-rustdesk-server.ps1`로 재현하며 종료 경로에서 두 프로세스를 정리한다.
+
+| 프로세스 | 확인 항목 | 결과 |
+|---|---|---|
+| `hbbs.exe -p 22116 -r 127.0.0.1:22117` | TCP `22115`, `22116`, `22118`; UDP `22116` | 통과 |
+| `hbbr.exe -p 22117` | TCP `22117`, `22119` | 통과 |
+| `hbbs.exe` | `id_ed25519`, `id_ed25519.pub` 생성 | 통과, 키 값은 비공개·Git 제외 |
+| 두 프로세스 | 시작 탐색 중 실행 유지, stderr 비어 있음, 탐색 후 종료 | 통과 |
+
+이 검증은 로컬 프로세스 기동 게이트다. 서로 다른 인터넷 회선의 직접 연결, 강제 중계와 실제 Client 연결 성공을 증명하지 않는다.
+
 ## 다음 실행
 
 1. `scripts/check-rustdesk-poc-prerequisites.ps1`로 준비 상태를 재현한다.
-2. 생성된 `hbbs`·`hbbr`를 격리 시험망에서 기동하고 임시 키·포트·로그 보존 위치를 기록한다.
-3. 원본 Client 두 대를 자체 서버에 연결해 직접 연결과 강제 중계 연결을 구분해 확인한다.
+2. 생성된 `hbbs`·`hbbr`의 로컬 기동 스모크 결과를 기준으로 격리 시험망의 서버 주소·방화벽·로그 보존 위치를 확정한다.
+3. 원본 Client 두 대를 격리 시험망 서버에 연결해 직접 연결과 강제 중계 연결을 구분해 확인한다.
 4. 공개 AGPL 포크를 만들고 `ezbaseviewer-hostonly` 브랜치에서 HostOnly 변경을 시작한다.
 5. `poc-runbook.md`의 다중 모니터, 파일 무결성, 단절·재접속, UAC·로그온, 재부팅 게이트를 순서대로 수행한다.
 6. 통과 증거와 미통과 항목을 ADR에 연결해 핵심 개발 착수 여부를 결정한다.
