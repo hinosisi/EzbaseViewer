@@ -1,6 +1,6 @@
 # 개발 진행 현황
 
-> 기준일: 2026-10-21
+> 기준일: 2026-10-22
 
 ## 완료
 
@@ -22,6 +22,13 @@
 - Ezbase 내부 API의 사설망/루프백 제한과 내부 서비스 키 이중 검사
 - 공개 반입 경계 검사 스크립트
 - Pull Request와 `main` 푸시에서 경계·빌드·정책·API 시험을 수행하는 GitHub Actions
+- RustDesk Client `1.4.9`·Server OSS `1.1.16` 공식 소스와 잠금 파일 해시 고정
+- RustDesk Windows PoC 도구 체인 점검 스크립트와 준비 현황 기록
+- RustDesk 공식 CI 기준 Rust `1.75.0`, Flutter `3.24.5`, LLVM `15.0.6`, bridge codegen `1.80.1`, vcpkg 커밋 고정
+- 수정 없는 RustDesk Client `rustdesk.exe`와 Server `hbbs.exe`·`hbbr.exe` Windows Release 빌드 재현
+- Client·Server 산출물 크기, SHA-256과 미서명 상태 기록
+- 사전 점검부터 Client bridge·Windows Release·Server Release·산출물 검사까지 단일 재현 스크립트 연속 통과
+- 임시 드라이브 변경 시 남는 Flutter CMake 절대 경로 캐시의 자동 정리와 경로 안전 검사
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
 
 ## 검증 결과
@@ -42,24 +49,28 @@
 | 코드 발급·교환·재사용 거부 | 통과 |
 | 승인형 세션 요청 | 통과 |
 | 감사 이벤트 수집 | 통과 |
+| RustDesk Client 1.4.9 Windows Release 빌드 | 통과 (`rustdesk.exe`, `1.4.9+67`) |
+| RustDesk Server OSS 1.1.16 Windows Release 빌드 | 통과 (`hbbs.exe`, `hbbr.exe`) |
+| RustDesk 고정 도구 체인·서브모듈 검사 | 통과 |
+| RustDesk 전체 재현 빌드 스크립트 | 통과 (`-ShortDrive S`, 종료 후 드라이브 해제·원본 `pubspec.yaml` 복원) |
 
 ## 현재 제약
 
 - 저장소는 메모리 기반 PoC다. 운영 데이터베이스와 실제 IdP를 연결하지 않았다.
 - 화면·입력·파일·직접/중계 데이터 경로는 RustDesk 통합 PoC 전이므로 구현하지 않았다.
-- RustDesk는 확정했지만 Windows 시험 장치와 자체 `hbbs`·`hbbr` 환경이 없어 UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
+- RustDesk는 확정했고 Windows 바이너리 빌드도 재현했지만 다중 시험 장치에 `hbbs`·`hbbr`를 기동하지 않아 직접/중계, UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
 - Apache-2.0 `LICENSE`와 `NOTICE`를 적용했으며 초기 저작권 표시는 `EzbaseViewer contributors`이다.
 - Ezbase 실제 사용자·조직·업체·장치 식별자와 앱 실행 방식이 제공되지 않았다.
 - 실제 Ezbase 내부 어댑터는 비공개 저장소가 준비된 뒤 구현한다. 공개 저장소에는 중립 계약만 유지한다.
-- REA는 Codex MCP에 등록되지 않았고 Ghidra/Hopper/IDA가 없다.
+- REA는 소스 분석의 대체 수단으로 사용하지 않는다. 이후 수정 바이너리·실행 시점 동작의 설명이 부족한 경우에만 보조 증거로 사용한다.
 
 ## 다음 게이트 입력
 
 1. Ezbase 기술 인터페이스 문서와 개발 계정
 2. 시범 업체의 지원 Windows 버전과 설치 권한 정책
-3. RustDesk 포크 저장소와 Windows 빌드 환경
+3. RustDesk 공개 AGPL 포크 저장소와 격리 시험망의 자체 `hbbs`·`hbbr` 주소
 4. AGPL-3.0 대응 소스 제공과 EzbaseViewer Apache 구성요소 경계의 서면 검토
 5. GitHub 보호 브랜치·자동 검사와 비공개 보안 제보 채널 설정
-6. REA Codex 등록과 네이티브 분석 제공자 설치 승인
+6. UAC·로그온·재부팅 시험용 관리자 권한 Windows 장치 2대 이상
 
 입력이 확보되면 `docs/phase-1/poc-runbook.md` 순서로 RustDesk 필수 게이트를 수행하고 결과를 선정 ADR에 연결한다.

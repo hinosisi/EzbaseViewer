@@ -33,7 +33,8 @@ EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 실제 Ezbas
 
 - Windows 10/11 x64
 - .NET 8 SDK 이상
-- 엔진 PoC 단계: Node.js 22.19+/24.11+/26+, npm, 승인된 REA와 분석 제공자
+- 엔진 PoC 단계: Visual Studio 2022 C++ workload, Rust `1.75.0`, Flutter `3.24.5`, LLVM `15.0.6`, 고정 vcpkg
+- REA는 수정 바이너리나 실행 시점 동작에 추가 증거가 필요할 때만 사용
 
 ## 빌드와 시험
 
@@ -43,6 +44,15 @@ dotnet run --project .\tests\EzbaseViewer.Core.Tests\EzbaseViewer.Core.Tests.csp
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-api.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-public-boundary.ps1
 ```
+
+RustDesk 고정 소스와 도구 체인이 `work/`에 준비된 PC에서는 다음 명령으로 원본 Client와 Server Windows 빌드를 재현한다. 생성 바이너리는 시험용이며 제품 배포 전에 브랜딩·정책·서명 절차를 거쳐야 한다.
+
+```powershell
+pwsh -NoProfile -File .\scripts\check-rustdesk-poc-prerequisites.ps1
+pwsh -NoProfile -File .\scripts\build-rustdesk-poc.ps1
+```
+
+긴 작업 경로에서는 빌드 스크립트가 기본적으로 임시 `R:` 드라이브를 사용한다. 이미 사용 중이면 `-ShortDrive S`처럼 다른 문자를 지정한다. 스크립트는 종료 시 임시 드라이브와 Client의 임시 의존성 변경을 복원한다.
 
 ## 제어 서버 실행
 
@@ -59,8 +69,9 @@ dotnet run --project .\src\EzbaseViewer.Server\EzbaseViewer.Server.csproj --urls
 
 1. [RustDesk 선정 ADR](docs/adr/0001-select-rustdesk-engine.md)과 [통합 설계](docs/phase-1/rustdesk-integration.md)를 기준선으로 사용한다.
 2. `docs/phase-1/poc-runbook.md`로 RustDesk Windows·직접/중계 PoC를 수행한다.
-3. `docs/phase-1/rea-readiness.md`에 따라 설명이 부족한 항목만 REA로 보완 분석한다.
-4. HostOnly 포크와 관리자 Viewer 어댑터, `hbbs`·`hbbr` 시험 환경을 구성한다.
-5. 필수 게이트 증거를 승인한 뒤 핵심 원격제어 개발로 전환한다.
+3. [PoC 준비 현황](docs/phase-1/rustdesk-poc-readiness.md)과 `scripts/check-rustdesk-poc-prerequisites.ps1`로 고정 도구 체인을 준비한다.
+4. `docs/phase-1/rea-readiness.md`에 따라 설명이 부족한 바이너리 동작만 REA로 보완 분석한다.
+5. HostOnly 포크와 관리자 Viewer 어댑터, `hbbs`·`hbbr` 시험 환경을 구성한다.
+6. 필수 게이트 증거를 승인한 뒤 핵심 원격제어 개발로 전환한다.
 
 상위 계획은 [EzbaseViewer 개발 계획](docs/EzbaseViewer%20개발%20계획.md)을 따른다.
