@@ -1,11 +1,18 @@
 [CmdletBinding()]
 param(
-    [string]$ClientSource = (Join-Path (Split-Path -Parent $PSScriptRoot) 'work\rustdesk-client-1.4.9'),
-    [string]$ServerSource = (Join-Path (Split-Path -Parent $PSScriptRoot) 'work\rustdesk-server-1.1.16')
+    [string]$ClientSource,
+    [string]$ServerSource
 )
 
 $ErrorActionPreference = 'Stop'
 $failed = $false
+$projectRoot = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($ClientSource)) {
+    $ClientSource = Join-Path $projectRoot 'work\rustdesk-client-1.4.9'
+}
+if ([string]::IsNullOrWhiteSpace($ServerSource)) {
+    $ServerSource = Join-Path $projectRoot 'work\rustdesk-server-1.1.16'
+}
 
 function Write-Check([string]$Name, [bool]$Passed, [string]$Detail) {
     $status = if ($Passed) { 'PASS' } else { 'MISSING' }
@@ -17,6 +24,17 @@ function Write-Check([string]$Name, [bool]$Passed, [string]$Detail) {
 
 function Find-Command([string]$Name) {
     return Get-Command $Name -ErrorAction SilentlyContinue
+}
+
+function Get-ExecutablePath($Command) {
+    if ($null -eq $Command) { return $null }
+    if ($Command.PSObject.Properties.Name -contains 'Path' -and $Command.Path) {
+        return $Command.Path
+    }
+    if ($Command.PSObject.Properties.Name -contains 'FullName' -and $Command.FullName) {
+        return $Command.FullName
+    }
+    return $Command.Source
 }
 
 $git = Find-Command 'git'
@@ -51,11 +69,13 @@ $rustup = Find-Command 'rustup'
 if (-not $rustup -and (Test-Path -LiteralPath (Join-Path $cargoBin 'rustup.exe'))) {
     $rustup = Get-Item -LiteralPath (Join-Path $cargoBin 'rustup.exe')
 }
-$rustcOutput = if ($rustup) { & $rustup.FullName run 1.75.0 rustc --version 2>$null } else { $null }
-$rustfmtOutput = if ($rustup) { & $rustup.FullName run 1.75.0 rustfmt --version 2>$null } else { $null }
+$rustupPath = Get-ExecutablePath $rustup
+$cargoPath = Get-ExecutablePath $cargo
+$rustcOutput = if ($rustupPath) { & $rustupPath run 1.75.0 rustc --version 2>$null } else { $null }
+$rustfmtOutput = if ($rustupPath) { & $rustupPath run 1.75.0 rustfmt --version 2>$null } else { $null }
 Write-Check 'Rust compiler 1.75.0' ($rustcOutput -match '^rustc 1\.75\.0 ') $(if ($rustcOutput) { $rustcOutput } else { 'Install with rustup toolchain install 1.75.0 --profile minimal.' })
 Write-Check 'rustfmt for Rust 1.75.0' ($rustfmtOutput -match '^rustfmt 1\.7\.0-stable') $(if ($rustfmtOutput) { $rustfmtOutput } else { 'Install with rustup component add rustfmt --toolchain 1.75.0.' })
-Write-Check 'Cargo' ($null -ne $cargo) $(if ($cargo) { (& $cargo.FullName --version) } else { 'Installed with rustup.' })
+Write-Check 'Cargo' ($null -ne $cargo) $(if ($cargoPath) { (& $cargoPath --version) } else { 'Installed with rustup.' })
 
 $cargoExpand = Join-Path $cargoBin 'cargo-expand.exe'
 $bridgeCodegen = Join-Path $cargoBin 'flutter_rust_bridge_codegen.exe'
@@ -71,7 +91,6 @@ $llvmCandidates = @(
 $llvmPath = $llvmCandidates | Where-Object { Test-Path -LiteralPath (Join-Path $_ 'libclang.dll') } | Select-Object -First 1
 Write-Check 'LLVM/libclang 15.0.6' ($null -ne $llvmPath) $(if ($llvmPath) { $llvmPath } else { 'Install LLVM 15.0.6 and set LIBCLANG_PATH.' })
 
-$projectRoot = Split-Path -Parent $PSScriptRoot
 $flutterVersion = $null
 $sideBySideFlutter = Join-Path $projectRoot 'work\toolchains\flutter-3.24.5'
 $flutterVersionFile = 'C:\Users\admin\dev\flutter\bin\cache\flutter.version.json'

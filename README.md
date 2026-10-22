@@ -22,9 +22,9 @@ RustDesk 변경 소스는 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk
 - 메모리 기반 감사 이벤트와 상관관계 ID
 - 핵심 보안 규칙, RustDesk 엔진 고정과 Ezbase 내부망 제한을 확인하는 8개 자동 시험
 
-현재 저장소는 탐색용 기반이며 다음 기능은 아직 제품 구현이 아니다.
+현재 저장소는 탐색용 기반이다. HostOnly Windows Release 시험 패키지는 생성했지만 다음 기능은 아직 제품 통합이 아니다.
 
-- 원격 화면·키보드·마우스·파일 전송 엔진
+- 제어 서버의 세션 허가와 RustDesk 화면·입력·파일 전송 데이터 경로 연결
 - Windows 서비스와 사용자 세션 프로세스
 - 영구 데이터베이스, 실제 IdP, 분산 캐시
 - 접속 조정·중계 서버
@@ -50,13 +50,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-public-bound
 RustDesk 고정 소스와 도구 체인이 `work/`에 준비된 PC에서는 다음 명령으로 원본 Client와 Server Windows 빌드를 재현한다. 생성 바이너리는 시험용이며 제품 배포 전에 브랜딩·정책·서명 절차를 거쳐야 한다.
 
 ```powershell
-pwsh -NoProfile -File .\scripts\check-rustdesk-poc-prerequisites.ps1
-pwsh -NoProfile -File .\scripts\build-rustdesk-poc.ps1
-pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-rustdesk-poc-prerequisites.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-rustdesk-poc.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-rustdesk-server.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-rustdesk-host-poc.ps1
 ```
 
 긴 작업 경로에서는 빌드 스크립트가 기본적으로 임시 `R:` 드라이브를 사용한다. 이미 사용 중이면 `-ShortDrive S`처럼 다른 문자를 지정한다. 스크립트는 종료 시 임시 드라이브와 Client의 임시 의존성 변경을 복원한다.
 서버 스모크 시험은 로컬 PoC 포트에서 `hbbs`·`hbbr`를 잠시 실행해 수신 포트와 키 생성을 검사한 뒤 항상 종료한다. 생성 키와 로그는 Git에서 제외된 `work/poc-runtime/`에 둔다.
+Host 빌드 스크립트는 같은 `outputs` 폴더의 `EzbaseViewer-rustdesk` 공개 포크 체크아웃을 사용한다. Flutter 플러그인 심볼릭 링크를 위해 Windows 개발자 모드가 필요하다. 결과는 전체 런타임 디렉터리 `artifacts/rustdesk-host-poc/EzbaseViewerHost/`와 배포용 `EzbaseViewerHost-win-x64.zip`이다. ZIP에는 실행 파일, DLL, Flutter 데이터와 빌드 커밋·해시가 기록된 `build-manifest.json`이 함께 들어간다.
 
 ## 제어 서버 실행
 

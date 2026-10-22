@@ -33,6 +33,8 @@
 - REA 6.7.0 CLI 기동과 읽기 전용 doctor/dry-run 확인
 - `hinosisi/EzbaseViewer-rustdesk` 공개 AGPL 포크와 `ezbaseviewer-hostonly` 브랜치 생성
 - Host 프로필의 incoming-only 강제, EzbaseViewer Host 브랜딩과 원격 접속 시작 코어 차단
+- HostOnly Windows Flutter Release 전체 빌드와 92파일 런타임 ZIP 패키징
+- 제품 메타데이터(`EzbaseViewer Host`, `EzbaseViewer Contributors`)와 빌드 manifest 반영
 
 ## 검증 결과
 
@@ -59,12 +61,16 @@
 | RustDesk Server 로컬 기동 스모크 | 통과 (`hbbs` TCP 22115·22116·22118/UDP 22116, `hbbr` TCP 22117·22119, 키 생성·종료) |
 | RustDesk HostOnly 기능 컴파일 | 통과 (`flutter,hwcodec,ezbaseviewer-host`) |
 | HostOnly 정책·브랜딩 단위시험 | 통과 (`1 passed`) |
+| HostOnly Windows Flutter Release 빌드 | 통과 (`ezbaseviewer-host`, `hwcodec`, `flutter`) |
+| Host 런타임 ZIP 무결성 | 통과 (92개 파일, 압축 해제 실행 파일 SHA-256 일치) |
+| Host 실행 진입 스모크 | 통과 (`rustdesk.exe --version`, 종료 코드 0) |
 
 ## 현재 제약
 
 - 저장소는 메모리 기반 PoC다. 운영 데이터베이스와 실제 IdP를 연결하지 않았다.
-- 화면·입력·파일·직접/중계 데이터 경로는 RustDesk 통합 PoC 전이므로 구현하지 않았다.
-- RustDesk는 확정했고 Windows 바이너리 빌드도 재현했지만 다중 시험 장치에 `hbbs`·`hbbr`를 기동하지 않아 직접/중계, UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
+- 제어 서버의 세션 허가를 RustDesk 화면·입력·파일·직접/중계 데이터 경로에 연결하는 어댑터는 아직 구현하지 않았다.
+- RustDesk는 확정했고 HostOnly Windows 패키지까지 재현했지만 다중 시험 장치에 `hbbs`·`hbbr`를 기동하지 않아 직접/중계, 실제 수신 연결, UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
+- 현재 Host 시험 패키지는 Authenticode 미서명이다. 배포 인증서와 설치 프로그램이 준비되기 전에는 개발 시험에만 사용한다.
 - Apache-2.0 `LICENSE`와 `NOTICE`를 적용했으며 초기 저작권 표시는 `EzbaseViewer contributors`이다.
 - Ezbase 실제 사용자·조직·업체·장치 식별자와 앱 실행 방식이 제공되지 않았다.
 - 실제 Ezbase 내부 어댑터는 비공개 저장소가 준비된 뒤 구현한다. 공개 저장소에는 중립 계약만 유지한다.

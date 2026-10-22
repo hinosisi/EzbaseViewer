@@ -13,7 +13,7 @@
 | Server `hbb_common` submodule | `83419b6549636ee39dacef7776c473f5802e08d6` | 해당 없음 | Server가 지정한 커밋 복제 완료 |
 | Client·Server 라이선스 본문 | AGPL-3.0 | `6F1E622C82A380075843BB084A7EC3B1F1D12A4A02526D75E78B0924A860AA75` | 동일 본문 해시 확인 |
 
-원본 복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 제품 변경은 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에 반영한다. 최초 변경 커밋은 `b7c2bad`다.
+원본 복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 제품 변경은 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에 반영한다. 최초 HostOnly 변경은 `b7c2bad`, 최종 제품 메타데이터 반영 기준은 `f063ba2`다.
 
 ## Windows 빌드 기준
 
@@ -57,9 +57,9 @@ RustDesk 공식 Windows 빌드 문서는 MSVC C++ workload, Rust, vcpkg, LLVM/li
 재현 명령은 다음과 같다.
 
 ```powershell
-pwsh -NoProfile -File .\scripts\check-rustdesk-poc-prerequisites.ps1
-pwsh -NoProfile -File .\scripts\build-rustdesk-poc.ps1
-pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-rustdesk-poc-prerequisites.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-rustdesk-poc.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-rustdesk-server.ps1
 ```
 
 2026-10-22 전체 실행에서 사전 점검, Client bridge 생성, Client Windows Release, Server Release, 산출물 검사까지 연속 통과했다. 빌드 스크립트는 Windows 긴 경로를 피하려고 작업 중에만 `R:`을 `work/`에 연결하며 종료 시 해제한다. 다른 드라이브 문자가 필요하면 `-ShortDrive S`처럼 지정한다. Client bridge 생성 시 공식 CI 절차에 맞춰 `extended_text`를 잠시 `13.0.0`으로 내리고 생성 후 원래 `14.0.0`으로 복원한다. Flutter CMake가 절대 드라이브 경로를 캐시하므로, 스크립트는 현재 빌드 전에 생성된 `flutter/build/windows`만 경로 검증 후 정리한다.
@@ -85,16 +85,27 @@ pwsh -NoProfile -File .\scripts\smoke-rustdesk-server.ps1
 |---|---|
 | `cargo +1.75.0 check --locked --features flutter,hwcodec,ezbaseviewer-host --lib` | 통과 |
 | `common::tests::ezbaseviewer_host_profile_is_incoming_only_and_branded` | 통과, 1개 실행 |
+| Windows Flutter Release 전체 빌드 | 통과, `ezbaseviewer-host`, `hwcodec`, `flutter` 기능 적용 |
+| 런타임 패키지 | 통과, 92개 파일을 `EzbaseViewerHost-win-x64.zip`으로 묶고 압축 해제 후 실행 파일 해시 일치 확인 |
+| 실행 파일 메타데이터 | `EzbaseViewer Host`, `EzbaseViewer Contributors`, `1.4.9+67` 확인 |
+| 실행 파일 스모크 | 패키지 안의 `rustdesk.exe --version` 종료 코드 0 |
 | 공개 브랜치 | `hinosisi/EzbaseViewer-rustdesk:ezbaseviewer-hostonly` |
 
-전체 Windows Flutter Release 산출물 생성과 실제 설치형 Host 동작은 다음 시험 게이트에서 수행한다.
+시험 산출물은 Git에서 제외된 `artifacts/rustdesk-host-poc/`에 둔다.
+
+| 산출물 | 크기 | SHA-256 | Authenticode |
+|---|---:|---|---|
+| Host 실행 파일 `rustdesk.exe` | 358,400 bytes | `85DE90AE04EF83A7F03A27DDE39009DBEADE2156BC6DEE82156C508E0DA7257C` | 미서명 |
+| `EzbaseViewerHost-win-x64.zip` | 32,368,089 bytes | `ED250B318FA6645075A3487CA7173E4406E3EC89DCCC852785A15E8B12CAE691` | 해당 없음 |
+
+이 결과는 빌드·패키징·프로세스 진입 검증이다. 실제 설치형 서비스, 수신 연결, UAC·로그온 화면과 재부팅 후 재접속은 장치 시험에서 판정한다. 미서명 패키지는 개발 시험에만 사용한다.
 
 ## 다음 실행
 
 1. `scripts/check-rustdesk-poc-prerequisites.ps1`로 준비 상태를 재현한다.
 2. 생성된 `hbbs`·`hbbr`의 로컬 기동 스모크 결과를 기준으로 격리 시험망의 서버 주소·방화벽·로그 보존 위치를 확정한다.
 3. 원본 Client 두 대를 격리 시험망 서버에 연결해 직접 연결과 강제 중계 연결을 구분해 확인한다.
-4. 공개 포크의 `ezbaseviewer-hostonly` 브랜치로 Windows Flutter Release Host를 빌드하고 접속 시작 UI가 없는지 확인한다.
+4. 압축을 해제한 Host를 격리된 Windows 시험 장치에 실행해 접속 시작 UI가 없고 수신 대기 기능만 제공되는지 확인한다.
 5. `poc-runbook.md`의 다중 모니터, 파일 무결성, 단절·재접속, UAC·로그온, 재부팅 게이트를 순서대로 수행한다.
 6. 통과 증거와 미통과 항목을 ADR에 연결해 핵심 개발 착수 여부를 결정한다.
 

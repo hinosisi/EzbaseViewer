@@ -10,6 +10,25 @@
 - RustDesk Client `1.4.9`와 Server OSS `1.1.16` 소스·릴리스 자산
 - AGPL-3.0 원문, 포크 공개·대응 소스 제공 절차
 
+## Host 시험 패키지 준비
+
+빌드 PC에서 다음 명령을 실행한다. Flutter Windows 플러그인 심볼릭 링크를 위해 Windows 개발자 모드가 켜져 있어야 한다.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-rustdesk-host-poc.ps1
+Get-FileHash .\artifacts\rustdesk-host-poc\EzbaseViewerHost-win-x64.zip -Algorithm SHA256
+```
+
+시험 PC에는 `EzbaseViewerHost-win-x64.zip`만 복사한다. 압축을 새 폴더에 풀고 `build-manifest.json`의 `ExecutableSHA256`과 다음 명령의 결과가 같은지 확인한다.
+
+```powershell
+Get-FileHash .\rustdesk.exe -Algorithm SHA256
+(Get-Item .\rustdesk.exe).VersionInfo | Select-Object ProductName,FileDescription,CompanyName,ProductVersion
+Get-AuthenticodeSignature .\rustdesk.exe | Select-Object Status,SignerCertificate
+```
+
+현재 PoC 패키지의 기대 제품명은 `EzbaseViewer Host`, 회사명은 `EzbaseViewer Contributors`다. 개발 패키지는 미서명이므로 격리 시험 PC에서만 실행한다. `rustdesk.exe`와 같은 폴더의 DLL 및 `data` 디렉터리를 함께 유지해야 한다.
+
 ## 실행 순서
 
 1. RustDesk 소스 태그·커밋과 설치 파일의 버전, 서명자, SHA-256, 획득 URL을 기록한다.
