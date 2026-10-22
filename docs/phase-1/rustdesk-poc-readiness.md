@@ -1,6 +1,6 @@
 # RustDesk PoC 준비 현황
 
-> 점검일: 2026-10-22
+> 점검일: 2026-10-23
 > 대상: RustDesk Client `1.4.9`, RustDesk Server OSS `1.1.16`
 
 ## 소스 기준선
@@ -13,7 +13,7 @@
 | Server `hbb_common` submodule | `83419b6549636ee39dacef7776c473f5802e08d6` | 해당 없음 | Server가 지정한 커밋 복제 완료 |
 | Client·Server 라이선스 본문 | AGPL-3.0 | `6F1E622C82A380075843BB084A7EC3B1F1D12A4A02526D75E78B0924A860AA75` | 동일 본문 해시 확인 |
 
-원본 복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 제품 변경은 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에 반영한다. 최초 HostOnly 변경은 `b7c2bad`, 최종 제품 메타데이터 반영 기준은 `f063ba2`다.
+원본 복제 소스는 공개 저장소의 `work/`에 두고 Git 추적에서 제외했다. 제품 변경은 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에 반영한다. 최초 HostOnly 변경은 `b7c2bad`, 제품 메타데이터 반영은 `f063ba2`, 자체 rendezvous 설정 전 fail-closed 동작은 `1348903`이다.
 
 ## Windows 빌드 기준
 
@@ -79,12 +79,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-rustdesk
 
 ## HostOnly 포크 검증
 
-공개 포크의 `ezbaseviewer-hostonly` 브랜치에 Cargo 기능 `ezbaseviewer-host`를 추가했다. 이 기능은 기존 incoming-only UI를 활성화하고 Rust 연결 코어가 외부 대상 연결을 시작하지 못하게 한다. Windows 제품 메타데이터와 런타임 앱 이름은 `EzbaseViewer Host`로 구분한다.
+공개 포크의 `ezbaseviewer-hostonly` 브랜치에 Cargo 기능 `ezbaseviewer-host`를 추가했다. 이 기능은 기존 incoming-only UI를 활성화하고 Rust 연결 코어가 외부 대상 연결을 시작하지 못하게 한다. Windows 제품 메타데이터와 런타임 앱 이름은 `EzbaseViewer Host`로 구분한다. 자체 rendezvous 서버가 명시되지 않았거나 `rustdesk.com` 계열 주소가 설정되면 등록 루프 진입 전에 대기하며 NAT·rendezvous 검사와 RustDesk 자동 업데이트 호출도 차단한다.
 
 | 검증 | 결과 |
 |---|---|
 | `cargo +1.75.0 check --locked --features flutter,hwcodec,ezbaseviewer-host --lib` | 통과 |
-| `common::tests::ezbaseviewer_host_profile_is_incoming_only_and_branded` | 통과, 1개 실행 |
+| Host 프로필·rendezvous 정책 단위시험 | 통과, 2개 실행 |
 | Windows Flutter Release 전체 빌드 | 통과, `ezbaseviewer-host`, `hwcodec`, `flutter` 기능 적용 |
 | 런타임 패키지 | 통과, 92개 파일을 `EzbaseViewerHost-win-x64.zip`으로 묶고 압축 해제 후 실행 파일 해시 일치 확인 |
 | 실행 파일 메타데이터 | `EzbaseViewer Host`, `EzbaseViewer Contributors`, `1.4.9+67` 확인 |
@@ -95,17 +95,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-rustdesk
 
 | 산출물 | 크기 | SHA-256 | Authenticode |
 |---|---:|---|---|
-| Host 실행 파일 `rustdesk.exe` | 358,400 bytes | `85DE90AE04EF83A7F03A27DDE39009DBEADE2156BC6DEE82156C508E0DA7257C` | 미서명 |
-| `EzbaseViewerHost-win-x64.zip` | 32,368,089 bytes | `ED250B318FA6645075A3487CA7173E4406E3EC89DCCC852785A15E8B12CAE691` | 해당 없음 |
+| Host 실행 파일 `rustdesk.exe` | 358,400 bytes | `3419FCBAB99BE06A84BBF3B0426D7079230D167EDB468616B3B01EC9A49A04DC` | 미서명 |
+| `EzbaseViewerHost-win-x64.zip` | 31,631,440 bytes | `478B63009DDA69E887FC4A61A64EBA1C6DC1FB6E502DA673C1D21CB347A9831F` | 해당 없음 |
 
-이 결과는 빌드·패키징·프로세스 진입 검증이다. 실제 설치형 서비스, 수신 연결, UAC·로그온 화면과 재부팅 후 재접속은 장치 시험에서 판정한다. 미서명 패키지는 개발 시험에만 사용한다.
+`f063ba2` 기준 이전 패키지는 Windows 11 VM에서 일반 사용자로 ZIP·실행 파일 해시, 92개 파일, 제품 메타데이터와 5초 후 프로세스 실행 유지를 확인해 PASS를 기록했다. 위 표의 `1348903` 보안 게이트 패키지는 같은 VM에 배포했으며 재실행 확인이 남아 있다. 실제 설치형 서비스, 수신 연결, UAC·로그온 화면과 재부팅 후 재접속은 장치 시험에서 판정한다. 미서명 패키지는 개발 시험에만 사용한다.
 
 ## 다음 실행
 
 1. `scripts/check-rustdesk-poc-prerequisites.ps1`로 준비 상태를 재현한다.
 2. 생성된 `hbbs`·`hbbr`의 로컬 기동 스모크 결과를 기준으로 격리 시험망의 서버 주소·방화벽·로그 보존 위치를 확정한다.
 3. 원본 Client 두 대를 격리 시험망 서버에 연결해 직접 연결과 강제 중계 연결을 구분해 확인한다.
-4. 압축을 해제한 Host를 격리된 Windows 시험 장치에 실행해 접속 시작 UI가 없고 수신 대기 기능만 제공되는지 확인한다.
+4. 압축을 해제한 Host를 격리된 Windows 시험 장치에 실행해 접속 시작 UI가 없고, 자체 rendezvous 설정 전에는 외부 서버에 등록하지 않는지 확인한다.
 5. `poc-runbook.md`의 다중 모니터, 파일 무결성, 단절·재접속, UAC·로그온, 재부팅 게이트를 순서대로 수행한다.
 6. 통과 증거와 미통과 항목을 ADR에 연결해 핵심 개발 착수 여부를 결정한다.
 

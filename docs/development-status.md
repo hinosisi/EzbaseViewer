@@ -1,6 +1,6 @@
 # 개발 진행 현황
 
-> 기준일: 2026-10-22
+> 기준일: 2026-10-23
 
 ## 완료
 
@@ -35,6 +35,8 @@
 - Host 프로필의 incoming-only 강제, EzbaseViewer Host 브랜딩과 원격 접속 시작 코어 차단
 - HostOnly Windows Flutter Release 전체 빌드와 92파일 런타임 ZIP 패키징
 - 제품 메타데이터(`EzbaseViewer Host`, `EzbaseViewer Contributors`)와 빌드 manifest 반영
+- 자체 rendezvous 서버 미설정·RustDesk 공용 서버 설정 시 Host 네트워크 등록을 막는 fail-closed 정책
+- Windows 11 VM 일반 사용자 환경의 초기 Host 패키지 무결성·프로세스 기동 스모크 통과
 
 ## 검증 결과
 
@@ -60,16 +62,17 @@
 | RustDesk 전체 재현 빌드 스크립트 | 통과 (`-ShortDrive S`, 종료 후 드라이브 해제·원본 `pubspec.yaml` 복원) |
 | RustDesk Server 로컬 기동 스모크 | 통과 (`hbbs` TCP 22115·22116·22118/UDP 22116, `hbbr` TCP 22117·22119, 키 생성·종료) |
 | RustDesk HostOnly 기능 컴파일 | 통과 (`flutter,hwcodec,ezbaseviewer-host`) |
-| HostOnly 정책·브랜딩 단위시험 | 통과 (`1 passed`) |
+| HostOnly 정책·브랜딩·공용 rendezvous 차단 단위시험 | 통과 (`2 passed`) |
 | HostOnly Windows Flutter Release 빌드 | 통과 (`ezbaseviewer-host`, `hwcodec`, `flutter`) |
-| Host 런타임 ZIP 무결성 | 통과 (92개 파일, 압축 해제 실행 파일 SHA-256 일치) |
+| Host 런타임 ZIP 무결성 | 통과 (92개 파일, 압축 해제 실행 파일 SHA-256 일치, 소스 `1348903`) |
 | Host 실행 진입 스모크 | 통과 (`rustdesk.exe --version`, 종료 코드 0) |
+| Windows 11 VM 초기 실행 스모크 | 통과 (일반 사용자, 해시·메타데이터 일치, 5초 후 프로세스 유지) |
 
 ## 현재 제약
 
 - 저장소는 메모리 기반 PoC다. 운영 데이터베이스와 실제 IdP를 연결하지 않았다.
 - 제어 서버의 세션 허가를 RustDesk 화면·입력·파일·직접/중계 데이터 경로에 연결하는 어댑터는 아직 구현하지 않았다.
-- RustDesk는 확정했고 HostOnly Windows 패키지까지 재현했지만 다중 시험 장치에 `hbbs`·`hbbr`를 기동하지 않아 직접/중계, 실제 수신 연결, UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
+- RustDesk는 확정했고 HostOnly Windows 패키지와 단일 VM 기동까지 재현했지만 새 fail-closed 패키지의 VM 재확인과 자체 `hbbs`·`hbbr` 연결, 직접/중계, 실제 수신 연결, UAC·로그온·재부팅 PoC는 아직 수행하지 않았다.
 - 현재 Host 시험 패키지는 Authenticode 미서명이다. 배포 인증서와 설치 프로그램이 준비되기 전에는 개발 시험에만 사용한다.
 - Apache-2.0 `LICENSE`와 `NOTICE`를 적용했으며 초기 저작권 표시는 `EzbaseViewer contributors`이다.
 - Ezbase 실제 사용자·조직·업체·장치 식별자와 앱 실행 방식이 제공되지 않았다.

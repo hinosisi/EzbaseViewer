@@ -8,7 +8,7 @@ EzbaseViewer 자체 개발 소스는 Apache-2.0으로 공개한다. 실제 Ezbas
 
 원격제어 엔진은 RustDesk로 확정했다. 현재 구현은 RustDesk 통합 PoC를 지원하는 제어 영역(control plane) 골격이며, 화면 캡처·입력 주입·중계 데이터 경로는 RustDesk Client `1.4.9`와 Server OSS `1.1.16` 기준으로 검증·통합한다.
 
-RustDesk 변경 소스는 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에서 관리한다. 최초 Host 프로필은 RustDesk의 incoming-only 정책을 컴파일 시 강제하고 원격 접속 시작 UI와 코어 연결 경로를 차단한다.
+RustDesk 변경 소스는 AGPL-3.0 공개 포크 [hinosisi/EzbaseViewer-rustdesk](https://github.com/hinosisi/EzbaseViewer-rustdesk)의 `ezbaseviewer-hostonly` 브랜치에서 관리한다. Host 프로필은 RustDesk의 incoming-only 정책을 컴파일 시 강제하고 원격 접속 시작 UI와 코어 연결 경로를 차단한다. 또한 명시적으로 설정한 EzbaseViewer 자체 rendezvous 서버가 없거나 RustDesk 공용 서버 주소가 설정되면 오프라인 상태를 유지하며 NAT·rendezvous·자동 업데이트 통신을 시작하지 않는다.
 
 ## 현재 구현
 
